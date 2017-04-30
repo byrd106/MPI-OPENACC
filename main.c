@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 
 double randomDraw() 
 {
@@ -166,10 +167,8 @@ void createGrid(int grid[][dimension]) {
 
 void writeToDataToCSV(double* data, int size) {	
 
-   printf("here is the size:: %i \n",size); 
-
    FILE *fp;
-   fp = fopen("danny.csv", "w+");
+   fp = fopen("data.csv", "w+");
    //fprintf(fp, "This is testing for fprintf...\n");  
    fputs("time,biomass\n", fp);
    for(int i = 0; i < size; i++) {
@@ -192,19 +191,29 @@ void display(int p[][dimension])
 }
 
 int main(int argc, char *argv[]) {
-  
+
   if(checkArguments(argc) == 1) {  	
   	
+
   	int runtime = atoi(argv[1]); 
   	double writeData[runtime]; 
   	
   	int grid[dimension][dimension]; 
   	createGrid(grid); 
   	
+  	/*
+	 Timer mechanism pulled from this stack overflow answer, and modifed to application needs
+  	 http://stackoverflow.com/questions/459691/best-timing-method-in-c
+	*/
+  	clock_t start = clock(), diff;
   	for(int i = 0; i < runtime; i++) {
   		writeData[i] = simulationRound(grid,i); // needs an inital slate and operation should be performed    		
   	}
-  	
+  	diff = clock() - start;
+  	int msec = diff * 1000 / CLOCKS_PER_SEC;
+	
+	printf("%d", msec);
+
   	writeToDataToCSV(writeData,runtime);
   	
   }	
