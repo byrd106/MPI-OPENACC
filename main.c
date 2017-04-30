@@ -114,62 +114,6 @@ void fireUpdate(int grid[][dimension]) {
 
 	}
 
-	for(int i = 0; i < dimension; i++) {
-		for(int q = 0; q < dimension; q++) {
-			// 0 0 0 
-			// 0 0 0 
-			// 0 0 0 
-
-			//left 
-			//right 
-			//bottom 
-			//down
-
-			// if()
-			// int left = q - 1; 
-			// int right = q + 1; 			
-			// if(left > -1) {
-			// 	grid[i][left] = 2;
-			// }
-			// if(right < dimension) {
-			// 	grid[i][right] = 2;
-			// }
-
-			// int down = i - 1; 
-			// int up = i + 1; 			
-			// if(left > -1) {
-			// 	grid[i][left] = 2;
-			// }
-			// if(right < dimension) {
-			// 	grid[i][right] = 2;
-			// }
-
-
-			// int previous = i - 1; 
-			// int next = i + 1; 
-
-
-		}
-	}
-
-	// // then we generate the next round of movement
-	// for(int i = 0; i < size; i++) {
-	// 	int previous = i - 1; 
-	// 	int next = i + 1; 
-
-	// 	if(grid[i] == 2 && previous > -1) {
-	// 		 if(grid[previous] == 1) {
-	// 			grid[previous] = 2; 
-	// 		 }
-	// 	}
-
-	// 	if(grid[i] == 2 && next < size) {
-	// 		 if(grid[next] == 1) {
-	// 			grid[next] = 2; 
-	// 		 }
-	// 	}
-	// }
-
 	for(int a = 0; a < fireCount; a++) {
 		grid[firesICoord[a]][firesQCoord[a]] = 0; // clear out the fires now 
 	}
@@ -189,21 +133,26 @@ void lightning(int grid[][dimension]) {
 void growTrees(int grid[][dimension]) {	
 	for(int i = 0; i < dimension; i++) {
 		for(int j = 0; j < dimension; j++) {
-			if(randomDraw() < 0.9 && grid[i][j] != 2) {
+			if(randomDraw() < 0.1 && grid[i][j] != 2) {
 				grid[i][j] = 1; 
 			}
 		}
 	}
 }
 
-double simulationRound(int grid[][dimension]) {
+double simulationRound(int grid[][dimension],int round) {
  
   fireUpdate(grid); 
+  
+  // if(round < 200) 
   lightning(grid);   // lightning has to come after fire update   
+  
   growTrees(grid); // trees come after this... so only non fire gets changed 
  
   double biomass = biomassCalculator(grid); 
+
   return biomass; 
+
 }
 
 void createGrid(int grid[][dimension]) {
@@ -253,7 +202,7 @@ int main(int argc, char *argv[]) {
   	createGrid(grid); 
   	
   	for(int i = 0; i < runtime; i++) {
-  		writeData[i] = simulationRound(grid); // needs an inital slate and operation should be performed    		
+  		writeData[i] = simulationRound(grid,i); // needs an inital slate and operation should be performed    		
   	}
   	
   	writeToDataToCSV(writeData,runtime);
