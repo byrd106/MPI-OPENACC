@@ -7,10 +7,11 @@ results = []
 runNumber = 3
 simLength = 1000
 
-serial = './a.out'
-gpu = './a.out'
+#serial = './norand'
+#gpu = './a.out'
 
-#gpu = './gpu'
+serial = './mainreg'; 
+gpu = './gpufour'
 
 #./a.out  
 # we could use this to run a problem size detection graph as well 
