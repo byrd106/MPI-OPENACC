@@ -6,10 +6,6 @@
 #include <curand.h>
 
 
-__device__
-int rand() {
-   return 0; 
-}
 
 
 #pragma acc routine(randomDraw)
@@ -17,7 +13,8 @@ double randomDraw()
 {
     double range = (1 - 0); 
     double div = RAND_MAX / range;
-    return 0 + (rand() / div);
+    //return 0 + (rand() / div);
+    return 0.01; 
     
 }
 
@@ -140,7 +137,7 @@ void fireUpdate(int grid[][dimension]) {
 void lightning(int grid[][dimension]) {
 	for(int i = 0; i < dimension; i++) {
 		for(int j = 0; j < dimension; j++) {
-			if(randomDraw() < 0.01) {
+			if(j % 100 == 0) {
 				grid[i][j] = 2; 
 			}
 		}
@@ -151,12 +148,22 @@ void lightning(int grid[][dimension]) {
 void growTrees(int grid[][dimension]) {	
 	for(int i = 0; i < dimension; i++) {
 		for(int j = 0; j < dimension; j++) {
-			if(randomDraw() < 0.1 && grid[i][j] != 2) {
+			if(j % 10 == 0 && grid[i][j] != 2) {
 				grid[i][j] = 1; 
 			}
 		}
 	}
 }
+
+#pragma acc routine(killtrees) 
+void killtrees(int grid[][dimension]) {
+   for(int i = 0; i < dimension; i++) {
+      for(int j = 0; j < dimension; j++) {
+          grid[i][j] = 0; 
+      }
+   }
+}
+
 
 #pragma acc routine(simulationRound)
 double simulationRound(int grid[][dimension],int round) {
@@ -168,6 +175,11 @@ double simulationRound(int grid[][dimension],int round) {
   
   growTrees(grid); // trees come after this... so only non fire gets changed 
  
+  if(round < 2) {
+     killtrees(grid); 
+  } 
+
+
   double biomass = biomassCalculator(grid); 
 
   return biomass; 
@@ -229,9 +241,12 @@ int main(int argc, char *argv[]) {
   	clock_t start = clock(), diff;
 	
         #pragma acc kernels copyin(grid[0:dimension][0:dimension],writeData[0:runtime]) copyout(writeData[0:runtime]) 
-  	for(int i = 0; i < runtime; i++) {
-  		writeData[i] = simulationRound(grid,i); // needs an inital slate and operation should be performed    		
-  	}
+        { 
+  		#pragma acc loop seq 
+		for(int i = 0; i < runtime; i++) {
+  			writeData[i] = simulationRound(grid,i); // needs an inital slate and operation should be performed    		
+  		}
+        } 
 
   	diff = clock() - start;
   	int msec = diff * 1000 / CLOCKS_PER_SEC;
